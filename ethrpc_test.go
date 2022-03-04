@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ETHtest/tool"
 	json2 "encoding/json"
 	"fmt"
 	"testing"
@@ -60,8 +61,8 @@ func Test_GetTransactions(t *testing.T) {
 }
 
 func Test_GetETHBalance(t *testing.T) {
-	nodeUrl := "https://mainnet.infura.io/v3/182344b8c3154851ad6a5544fc6b3b07"
-	address :="0xb873312eea2b9f07e73f3df5f628cf4e01026632"
+	nodeUrl := "https://ropsten.infura.io/v3/182344b8c3154851ad6a5544fc6b3b07"
+	address :="0x46833270E060E5290E2C357bb08afF89c7BceFa8"
 	if address ==""|| len(address) !=42{
 		fmt.Println("非法点交易地址值")
 		return
@@ -174,7 +175,7 @@ func Test_CreateETHWallet(t *testing.T) {
 	if err!=nil{
 		fmt.Println("第一次，创建钱包失败",err.Error())
 	}else{
-		fmt.Println("第一次，创建钱包成功，以太坊地址是：",address1)
+		fmt.Println("第一次，创钱包成功，以太坊地址是：",address1)
 	}
 	address2,err :=NewETHRPCRequester(nodeUrl).CreateETHWallet("123456a")
 	if err!=nil{
@@ -182,4 +183,39 @@ func Test_CreateETHWallet(t *testing.T) {
 	}else{
 		fmt.Println("第二次，创建钱包成功，以太坊地址是：",address2)
 	}
+}
+
+func Test_GetNonce(t *testing.T){
+	nodeUrl := "https://mainnet.infura.io/v3/182344b8c3154851ad6a5544fc6b3b07"
+	address := "0x29a491c5dea7b8375166bc26cccd0df6b89c4d59"
+	nonce,err :=NewETHRPCRequester(nodeUrl).GetNonce(address)
+	if err!= nil{
+		fmt.Println("查询 nonce失败，信息是：", err.Error())
+		return
+	}
+	fmt.Println(nonce)
+}
+
+func Test_SendETHTrasaction(t *testing.T) {
+	nodeUrl := "https://ropsten.infura.io/v3/182344b8c3154851ad6a5544fc6b3b07"
+	from :="0x46833270E060E5290E2C357bb08afF89c7BceFa8"
+	if from=="" || len(from) !=42{		fmt.Println("非法的交易地址值")
+		return
+	}
+	to := "0x11587ce064f95814E8c71D7cF1A5b6EB7a22bd83"
+	value :="0.05"
+	gasLimit :=uint64(100000)
+	gasprice :=uint64(36000000000)
+	err := tool.UnlockETHWallet("./keystores",from,"123456a")
+	if err!= nil{
+		fmt.Println(err.Error())
+		return
+	}
+
+	txHash,err :=NewETHRPCRequester(nodeUrl).SendETHTrasaction(from,to,value,gasLimit,gasprice)
+	if err!=nil{
+		fmt.Println("ETH 转账失败，信息是：",err.Error())
+		return
+	}
+	fmt.Println(txHash)
 }
